@@ -2,7 +2,6 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 function mapStateToProps (state) {
-    console.log(state)
     return {
         reviewList: state.ReviewReduce.rlist
     }

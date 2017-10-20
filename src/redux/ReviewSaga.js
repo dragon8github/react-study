@@ -28,8 +28,8 @@ export const Review_saga_post = function* () {
         const action = yield take('REVIEW_POST')
         // ajax：提交评论
         yield call(function* () {
-            const { content } = yield select()
-            const result      = yield call(ReviewAPI.postReview, content)
+            const state  = yield select()
+            const result = yield call(ReviewAPI.postReview, state.ReviewReduce.content)
             yield put({ type: 'REVIEW_LOAD_SUCCESS', reviewdata: result })
         })
     }
