@@ -1,6 +1,6 @@
 import React from 'react'
 import { Layout, Menu, Breadcrumb, Icon, Spin  } from 'antd'
-import { HashRouter as Router, Route, Link } from 'react-router-dom'
+import { HashRouter as Router, Route, Link, NavLink } from 'react-router-dom'
 import { connectedRouterRedirect } from 'redux-auth-wrapper/history4/redirect'
 import { withRouter } from 'react-router'
 import { connect }    from 'react-redux'
@@ -17,13 +17,14 @@ const userIsAuthenticated = connectedRouterRedirect({
     redirectPath: '/error',
     authenticatedSelector: state => {
         console.log(state)
+        // 获取当前url
         var url = state.router.location.pathname
-        // 如果刷新页面，但异步这可怎么办？
+        // 获取当前权限所支持url列表
         var permissions = state.AuthReduce.data.permissions || []
+        // 遍历该列表是否包含当前url
         for (let [index, ele] of permissions.entries()) {
-            if (url === ele.url) {
+            if (url === ele.url) 
                 return true
-            }
         }
         return false
     }
@@ -43,21 +44,21 @@ class Top_Sider_Nav extends React.Component {
         const { menuList, authList } = this.props
         // 获取权限列表
         let permissions = authList.permissions || []
-        let myroute;
+        // 当前url
+        let currUrl = this.props.location.pathname
+        // 默认显示加载图
+        let myroute = currUrl === '/' ? <div></div> : <Spin />
         // 我目前的做法是，左侧列表依然存在，但需要等待权限读取完毕才可以渲染右侧界面
         // 如果state更新，会重新调用render，这是react-redux的自动化特性。所以我们一直判断是否有值即可。
         // 其实配合Loading还是不错的。
-        // TODO：缺乏自动根据url地址，active左侧
+        // TODO：缺乏自动根据url地址，active左侧对应item
+        // TODO: 我希望他点击某些item之后才开始(也就是进入url才开始).而不是默认就展示loading，会和index冲突
         if (permissions.length) {
-            myroute = (
-                <div>
-                    <Route path = '/user/add'  component = { userIsAuthenticated(AddUser)        }/>
-                    <Route path = '/user/list' component = { userIsAuthenticated(ListUser)       }/>
-                    <Route path = '/error'     component = { MessageHoc('您没有权限')(BaseError) }/> 
-                </div>
-            )
-        } else {
-            myroute = <Spin />
+            myroute = (<div>
+                <Route path = '/user/add'  component = { userIsAuthenticated(AddUser)        }/>
+                <Route path = '/user/list' component = { userIsAuthenticated(ListUser)       }/>
+                <Route path = '/error'     component = { MessageHoc('您没有权限')(BaseError) }/> 
+            </div>)
         }
 
         return  <Layout>
