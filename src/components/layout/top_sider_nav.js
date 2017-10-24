@@ -1,5 +1,5 @@
 import React from 'react'
-import { Layout, Menu, Breadcrumb, Icon } from 'antd'
+import { Layout, Menu, Breadcrumb, Icon, Spin  } from 'antd'
 import { HashRouter as Router, Route, Link } from 'react-router-dom'
 import { connectedRouterRedirect } from 'redux-auth-wrapper/history4/redirect'
 import { withRouter } from 'react-router'
@@ -17,26 +17,48 @@ const userIsAuthenticated = connectedRouterRedirect({
     redirectPath: '/error',
     authenticatedSelector: state => {
         console.log(state)
-        let isAuth = false
         var url = state.router.location.pathname
-        var permissions = state.AuthReduce.data.permissions
+        // 如果刷新页面，但异步这可怎么办？
+        var permissions = state.AuthReduce.data.permissions || []
         for (let [index, ele] of permissions.entries()) {
             if (url === ele.url) {
-                return isAuth = true
+                return true
             }
         }
-        return isAuth
+        return false
     }
 })
 
 class Top_Sider_Nav extends React.Component {
     componentWillMount () {
+       // 获取所有的handle
        const { loadMenu, loadAuth } = this.props
+       // 加载菜单
        loadMenu()
+       // 加载权限
        loadAuth()
-    }
+    }    
     render () {
+        // 获取所有的state
         const { menuList, authList } = this.props
+        // 获取权限列表
+        let permissions = authList.permissions || []
+        let myroute;
+        // 我目前的做法是，左侧列表依然存在，但需要等待权限读取完毕才可以渲染右侧界面
+        // 如果state更新，会重新调用render，这是react-redux的自动化特性。所以我们一直判断是否有值即可。
+        // 其实配合Loading还是不错的。
+        // TODO：缺乏自动根据url地址，active左侧
+        if (permissions.length) {
+            myroute = (
+                <div>
+                    <Route path = '/user/add'  component = { userIsAuthenticated(AddUser)        }/>
+                    <Route path = '/user/list' component = { userIsAuthenticated(ListUser)       }/>
+                    <Route path = '/error'     component = { MessageHoc('您没有权限')(BaseError) }/> 
+                </div>
+            )
+        } else {
+            myroute = <Spin />
+        }
 
         return  <Layout>
                     <Header className  = 'header'>
@@ -57,7 +79,7 @@ class Top_Sider_Nav extends React.Component {
                             <Menu
                                 mode = 'inline'
                                 defaultSelectedKeys = {['1']}
-                                defaultOpenKeys = {['100', '101']}
+                                defaultOpenKeys = {['1000', '1010']}
                                 style = {{ height: '100%', borderRight: 0 }}
                             >
                                 {
@@ -85,9 +107,7 @@ class Top_Sider_Nav extends React.Component {
                                         <h2>测试组件首页</h2>
                                     </div>
                                 }}/>
-                                <Route path = '/user/add'  component = { userIsAuthenticated(AddUser)         }/>
-                                <Route path = '/user/list' component = { userIsAuthenticated(ListUser)        }/>
-                                <Route path = '/error'     component = { MessageHoc('您没有权限')(BaseError)  }/>
+                                { myroute }
                             </Content>
                         </Layout>
                     </Layout>
