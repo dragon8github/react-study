@@ -16,8 +16,8 @@ const { Header, Content, Sider } = Layout
 const userIsAuthenticated = connectedRouterRedirect({
     redirectPath: '/error',
     authenticatedSelector: state => {
-        console.log(state)
-        // 获取当前url
+        // console.log(state)
+        // 获取当前url 
         var url = state.router.location.pathname
         // 获取当前权限所支持url列表
         var permissions = state.AuthReduce.data.permissions || []
@@ -46,13 +46,11 @@ class Top_Sider_Nav extends React.Component {
         let permissions = authList.permissions || []
         // 当前url
         let currUrl = this.props.location.pathname
-        // 默认显示加载图
+        // 如果是在首页，就显示空，否则显示一个加载图
         let myroute = currUrl === '/' ? <div></div> : <Spin />
         // 我目前的做法是，左侧列表依然存在，但需要等待权限读取完毕才可以渲染右侧界面
         // 如果state更新，会重新调用render，这是react-redux的自动化特性。所以我们一直判断是否有值即可。
-        // 其实配合Loading还是不错的。
         // TODO：缺乏自动根据url地址，active左侧对应item
-        // TODO: 我希望他点击某些item之后才开始(也就是进入url才开始).而不是默认就展示loading，会和index冲突
         if (permissions.length) {
             myroute = (<div>
                 <Route path = '/user/add'  component = { userIsAuthenticated(AddUser)        }/>
@@ -79,14 +77,15 @@ class Top_Sider_Nav extends React.Component {
                         <Sider width = { 200 } style = {{ background: '#fff' }}>
                             <Menu
                                 mode = 'inline'
-                                defaultSelectedKeys = {['1']}
+                                defaultSelectedKeys = {['0001']}
                                 defaultOpenKeys = {['1000', '1010']}
                                 style = {{ height: '100%', borderRight: 0 }}
                             >
                                 {
                                     menuList.map(item => {
                                         return <SubMenu key = { item.id } title = { <span><Icon type = { item.icon } />{ item.name }</span> }>
-                                            {
+                                            <Menu.Item key = '0001' ><Link to = '/'>首页</Link></Menu.Item>
+                                            {                                                
                                                 item.subMenu.map(sub => {
                                                     return <Menu.Item key = { sub.id }><Link to = { sub.link }>{ sub.name }</Link></Menu.Item>
                                                 })
