@@ -7,6 +7,7 @@ import createSaga from 'redux-saga'
 import createHistory from 'history/createHashHistory'
 import MenuReduce from '@Reduces/MenuReduce'
 import AuthReduce from '@Reduces/AuthReduce'
+import UserReduce from '@Reduces/UserReduce'
 import MenuSaga from '@Sagas/MenuSaga'
 import AuthSaga from '@Sagas/AuthSaga'
 import Layout_TSN from '@Components/layout/top_sider_nav'
@@ -18,6 +19,7 @@ let saga  = createSaga()
 let store = createStore(combineReducers({
     MenuReduce: MenuReduce,
     AuthReduce: AuthReduce,
+    UserReduce: UserReduce,
     router: routerReducer
 }), applyMiddleware(router_middleware, saga))
 saga.run(MenuSaga)

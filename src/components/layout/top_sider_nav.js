@@ -4,10 +4,11 @@ import { HashRouter as Router, Route, Link, NavLink } from 'react-router-dom'
 import { connectedRouterRedirect } from 'redux-auth-wrapper/history4/redirect'
 import { withRouter } from 'react-router'
 import { connect }    from 'react-redux'
-import { BaseError }  from "@Components/Error"
-import { MessageHoc } from "@Components/Hoc"
-import AddUser  from "@Components/user/addUser"
-import ListUser from "@Components/user/listUser"
+import { BaseError }  from '@Components/Error'
+import { MessageHoc } from '@Components/Hoc'
+import AddUser   from '@Components/user/addUser'
+import ListUser  from '@Components/user/listUser'
+import UserLogin from '@Components/user/userLogin'
 
 const { SubMenu } = Menu
 const { Header, Content, Sider } = Layout
@@ -32,11 +33,13 @@ const userIsAuthenticated = connectedRouterRedirect({
 class Top_Sider_Nav extends React.Component {
     componentWillMount () {
        // 获取所有的handle
-       const { loadMenu, loadAuth } = this.props
+       const { loadMenu, loadAuth, checkUserLogin } = this.props
        // 加载菜单
        loadMenu()
        // 加载权限
        loadAuth()
+       // 判断是否登录
+       checkUserLogin();
     }    
     render () {
         // 获取所有的state
@@ -57,26 +60,26 @@ class Top_Sider_Nav extends React.Component {
                 <Route path = '/error'     component = { MessageHoc('您没有权限')(BaseError) }/> 
             </div>)
         }
-        // 默认激活项(必须是数组，且必须是String类型)
+        // 默认激活项(必须是数组)
         let defaultSelectedKeys = ['0001']
         // 遍历该列表是否包含当前url
         for (let [index, ele] of menuList.entries()) {
-            // 我们只关注子列表
+            // 子列表
             for (let [index2, ele2] of ele.subMenu.entries()) {
-                if (currUrl === '/error') {
-                    // 如果是出现error页面，那么就使用上一个正常的页面
-                    defaultSelectedKeys = [window.localStorage.getItem('prev_normal_url')]
-                }
                 if (currUrl === ele2.link) {
-                    defaultSelectedKeys = [ele2.id.toString()]    
+                    defaultSelectedKeys = [ele2.id]    
                     // 设置一下localStorage路由（简陋版）
-                    window.localStorage.setItem('prev_normal_url', ele2.id)                
+                    window.localStorage.setItem('prev_normal_url_id', ele2.id)                
+                } else if (currUrl === '/error') {
+                    // 如果是出现error页面，那么就使用上一个正常的页面的id
+                    defaultSelectedKeys = [window.localStorage.getItem('prev_normal_url_id')]
                 }
             }
         }
 
         // 开始渲染
         return  <Layout>
+                    <UserLogin />
                     <Header className  = 'header'>
                         <div className = 'logo' />
                         <Menu
@@ -154,6 +157,10 @@ function mapDispatchToProps (dispatch) {
         loadAuth: () => {
             // @Sagas/AuthSaga.js
             dispatch({ type: 'GET_USER_AUTH' })
+        },
+        checkUserLogin:() => {
+            // @Sagas/AuthSaga.js
+            dispatch({ type: 'INIT_LOAD_USER' })
         }
     }
 }
