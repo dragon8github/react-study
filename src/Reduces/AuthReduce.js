@@ -1,9 +1,7 @@
-import actions from '@Actions/CommonAction'
-
 export default (state = { data: [] }, action) => {
     switch (action.type) {
-        case actions.SetUserAuth().type:
-            return Object.assign({}, state, { data: action.authData })
+        case 'SET_USER_AUTH':
+            return Object.assign({}, state, { data: action.data })
         default:
             return state
     }

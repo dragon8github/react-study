@@ -6,7 +6,6 @@ import { withRouter } from 'react-router'
 import { connect }    from 'react-redux'
 import { BaseError }  from "@Components/Error"
 import { MessageHoc } from "@Components/Hoc"
-import actions  from '@Actions/CommonAction'
 import AddUser  from "@Components/user/addUser"
 import ListUser from "@Components/user/listUser"
 
@@ -58,14 +57,26 @@ class Top_Sider_Nav extends React.Component {
                 <Route path = '/error'     component = { MessageHoc('您没有权限')(BaseError) }/> 
             </div>)
         }
+        // 默认激活项(必须是数组，且必须是String类型)
+        let defaultSelectedKeys = ['0001']
+        // 遍历该列表是否包含当前url
+        for (let [index, ele] of menuList.entries()) {
+            // 我们只关注子列表
+            for (let [index2, ele2] of ele.subMenu.entries()) {
+                if (currUrl.indexOf(ele2.link) >= 0) {
+                    defaultSelectedKeys = [ele2.id.toString()]
+                }
+            }
+        }
 
+        // 开始渲染
         return  <Layout>
                     <Header className  = 'header'>
                         <div className = 'logo' />
                         <Menu
                             theme = 'dark'
                             mode  = 'horizontal'
-                            defaultSelectedKeys = {['2']}
+                            defaultSelectedKeys = {['1']}
                             style = {{ lineHeight: '64px' }}
                         >
                             <Menu.Item key = '1'> nav 1 </Menu.Item>
@@ -77,14 +88,16 @@ class Top_Sider_Nav extends React.Component {
                         <Sider width = { 200 } style = {{ background: '#fff' }}>
                             <Menu
                                 mode = 'inline'
-                                defaultSelectedKeys = {['0001']}
+                                defaultSelectedKeys = { defaultSelectedKeys }
                                 defaultOpenKeys = {['1000', '1010']}
                                 style = {{ height: '100%', borderRight: 0 }}
                             >
                                 {
                                     menuList.map(item => {
                                         return <SubMenu key = { item.id } title = { <span><Icon type = { item.icon } />{ item.name }</span> }>
-                                            <Menu.Item key = '0001' ><Link to = '/'>首页</Link></Menu.Item>
+                                            {
+                                                item.name === '用户管理' && <Menu.Item key = '0001' ><Link to = '/'>首页</Link></Menu.Item>
+                                            }
                                             {                                                
                                                 item.subMenu.map(sub => {
                                                     return <Menu.Item key = { sub.id }><Link to = { sub.link }>{ sub.name }</Link></Menu.Item>
@@ -127,13 +140,11 @@ function mapDispatchToProps (dispatch) {
     return {
         loadMenu: () => {
             // @Sagas/MenuSaga.js
-            // 【INIT_LOAD_MENU】
-            dispatch(actions.LoadMenu())
+            dispatch({ type: 'INIT_LOAD_MENU' })
         },
         loadAuth: () => {
             // @Sagas/AuthSaga.js
-            // 【GET_USER_AUTH】
-            dispatch(actions.GetUserAuth())
+            dispatch({ type: 'GET_USER_AUTH' })
         }
     }
 }
