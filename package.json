@@ -38,6 +38,7 @@
   },
   "scripts": {
     "build": "webpack",
-    "dev": "webpack-dev-server"
+    "dev": "webpack-dev-server",
+    "git": "git add . && git commit -m '123' && git push -u origin master"
   }
 }

@@ -63,8 +63,14 @@ class Top_Sider_Nav extends React.Component {
         for (let [index, ele] of menuList.entries()) {
             // 我们只关注子列表
             for (let [index2, ele2] of ele.subMenu.entries()) {
-                if (currUrl.indexOf(ele2.link) >= 0) {
-                    defaultSelectedKeys = [ele2.id.toString()]
+                if (currUrl === '/error') {
+                    // 如果是出现error页面，那么就使用上一个正常的页面
+                    defaultSelectedKeys = [window.localStorage.getItem('prev_normal_url')]
+                }
+                if (currUrl === ele2.link) {
+                    defaultSelectedKeys = [ele2.id.toString()]    
+                    // 设置一下localStorage路由（简陋版）
+                    window.localStorage.setItem('prev_normal_url', ele2.id)                
                 }
             }
         }
@@ -89,6 +95,7 @@ class Top_Sider_Nav extends React.Component {
                             <Menu
                                 mode = 'inline'
                                 defaultSelectedKeys = { defaultSelectedKeys }
+                                selectedKeys = { defaultSelectedKeys }
                                 defaultOpenKeys = {['1000', '1010']}
                                 style = {{ height: '100%', borderRight: 0 }}
                             >
@@ -132,6 +139,8 @@ function mapStateToProps (state) {
     return {
         // @Reduces/MenuReduce.js
         menuList: state.MenuReduce.data,
+
+        // @Reduces/AuthReduce.js
         authList: state.AuthReduce.data
     }
 }
